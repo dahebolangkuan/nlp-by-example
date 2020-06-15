@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Video Streaming Demonstration</title>
+    <style>
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 35%
+        }
+
+    </style>
+</head>
+    <h1>Video Streaming Demonstration</h1>
+    <div>
+        <video id="video" width="320" height="240" autoplay></video>
+        <canvas width="320" id="canvas" height="240" style="display: inline;"></canvas>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+</body>
+<script>
+        const video = document.getElementById("video")
+        const canvas = document.getElementById("canvas")
+        const ctx = canvas.getContext('2d');
+
+        const ws = io.connect(`http://${document.domain}:${location.port}`);
+        ws.on('video_feed_response', buffer => {
+            var arrayBufferView = new Uint8Array( buffer );
+            var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
+
+            createImageBitmap(blob).then(img => {
+                ctx.drawImage(img, 0, 0, 320, 240);
+            });
+        });
+
+        navigator.mediaDevices
+            .getUserMedia({ video: true })
+            .then(stream => video.srcObject = stream)
+            .catch(err => console.error(`${err.name}: ${err.message}`));
+
+        const timer = setInterval(() => {
+            ctx.drawImage(video, 0, 0, 320, 240);
+            const uri = canvas.toDataURL('image/jpeg', 1.0);
+            ws.emit('video_feed', uri);
+        }, 250);
+    </script>
+</html>
