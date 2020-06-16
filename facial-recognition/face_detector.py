@@ -11,8 +11,8 @@ class FaceDetector:
         img = self.__read_image(data, cv2.IMREAD_COLOR)
         gray = self.__read_image(data, cv2.COLOR_BGR2GRAY)
 
-        # Do magic!
-        faces = face_cascade.detectMultiScale(
+        # Identify the face
+        face = face_cascade.detectMultiScale(
             gray,
             scaleFactor=1.1,
             minNeighbors=5,
@@ -20,12 +20,20 @@ class FaceDetector:
             flags=cv2.CASCADE_SCALE_IMAGE
         )
 
-        # Draw a rectangle around the faces
-        for (x, y, w, h) in faces:
-            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        age = self.__guess_age(img)
+        gender = self.__guess_gender(img)
 
-        self.__guess_age(img)
-        self.__guess_gender(img)
+        # Frame the identified face and print the captured age and gender
+        for (x, y, w, h) in face:
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            img = cv2.putText(
+                img,  gender + ': ' + age,
+                (x, y - 10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.6,
+                (0, 0, 0),
+                2,
+                cv2.LINE_AA)
 
         ret, jpeg = cv2.imencode('.jpg', img)
         return jpeg.tobytes()
@@ -48,15 +56,17 @@ class FaceDetector:
     def __guess_age(img):
         age_net = FaceDetector.__load_net(img, 'age_net.caffemodel', 'age_deploy.prototxt')
         age = FaceDetector.__predict_feature(age_net,
-                                             ['(0-2)', '(4-6)', '(8-12)', '(15-20)', '(25-32)', '(38-43)', '(48-53)',
-                                              '(60-100)'])
+                                             ['0-2', '4-6', '8-12', '15-20', '25-32', '38-43', '48-53',
+                                              '60-100'])
         print(f'Age: {age[1:-1]} years')
+        return age
 
     @staticmethod
     def __guess_gender(img):
         gender_net = FaceDetector.__load_net(img, 'gender_net.caffemodel', 'gender_deploy.prototxt')
         gender = FaceDetector.__predict_feature(gender_net, ['Male', 'Female'])
         print(f'Gender: {gender}')
+        return gender
 
     @staticmethod
     def __load_net(img, model, proto):
