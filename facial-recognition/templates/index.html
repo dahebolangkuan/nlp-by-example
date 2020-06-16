@@ -15,8 +15,8 @@
 </head>
     <h1>Video Streaming Demonstration</h1>
     <div>
-        <video id="video" width="320" height="240" autoplay></video>
-        <canvas width="320" id="canvas" height="240" style="display: inline;"></canvas>
+        <video id="video" width="640" height="480" autoplay></video>
+        <canvas width="640" id="canvas" height="480" style="display: inline;"></canvas>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
@@ -32,7 +32,7 @@
             var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
 
             createImageBitmap(blob).then(img => {
-                ctx.drawImage(img, 0, 0, 320, 240);
+                ctx.drawImage(img, 0, 0, 640, 480);
             });
         });
 
@@ -42,9 +42,9 @@
             .catch(err => console.error(`${err.name}: ${err.message}`));
 
         const timer = setInterval(() => {
-            ctx.drawImage(video, 0, 0, 320, 240);
+            ctx.drawImage(video, 0, 0, 640, 480);
             const uri = canvas.toDataURL('image/jpeg', 1.0);
             ws.emit('video_feed', uri);
-        }, 250);
+        }, 500);
     </script>
 </html>
