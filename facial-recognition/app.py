@@ -1,6 +1,5 @@
 import os
 import logging
-from flask import render_template, Response
 from aiohttp import web
 import socketio
 from face_detector import FaceDetector
@@ -13,7 +12,7 @@ logging.basicConfig(
 face_detector = FaceDetector()
 
 
-async def index(req):
+def index(req):
     index_file = open('templates/index.html')
     return web.Response(body=index_file.read().encode('utf-8'), headers={'content-type': 'text/html'})
 

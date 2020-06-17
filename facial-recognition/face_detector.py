@@ -31,7 +31,7 @@ class FaceDetector:
                 (x, y - 10),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.6,
-                (0, 0, 0),
+                (255, 255, 0),
                 2,
                 cv2.LINE_AA)
 
