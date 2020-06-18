@@ -2,10 +2,13 @@ import cv2
 import base64
 import numpy as np
 
-face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
+face_cascade = cv2.CascadeClassifier("./models/haarcascade_frontalface_alt2.xml")
 
 
 class FaceDetector:
+
+    def __init__(self, age_gender_detector) -> None:
+        self.age_gender_detector = age_gender_detector
 
     def get_frame(self, data):
         img = self.__read_image(data, cv2.IMREAD_COLOR)
@@ -20,8 +23,11 @@ class FaceDetector:
             flags=cv2.CASCADE_SCALE_IMAGE
         )
 
-        age = self.__guess_age(img)
-        gender = self.__guess_gender(img)
+        age = self.age_gender_detector.detect_age(img)
+        print(f"Age: {age[1:-1]} years")
+
+        gender = self.age_gender_detector.detect_gender(img)
+        print(f"Gender: {gender}")
 
         # Frame the identified face and print the captured age and gender
         for (x, y, w, h) in face:
@@ -52,31 +58,3 @@ class FaceDetector:
 
         return cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
 
-    @staticmethod
-    def __guess_age(img):
-        age_net = FaceDetector.__load_net(img, 'age_net.caffemodel', 'age_deploy.prototxt')
-        age = FaceDetector.__predict_feature(age_net,
-                                             ['0-2', '4-6', '8-12', '15-20', '25-32', '38-43', '48-53',
-                                              '60-100'])
-        print(f'Age: {age[1:-1]} years')
-        return age
-
-    @staticmethod
-    def __guess_gender(img):
-        gender_net = FaceDetector.__load_net(img, 'gender_net.caffemodel', 'gender_deploy.prototxt')
-        gender = FaceDetector.__predict_feature(gender_net, ['Male', 'Female'])
-        print(f'Gender: {gender}')
-        return gender
-
-    @staticmethod
-    def __load_net(img, model, proto):
-        model_mean_values = (78.4263377603, 87.7689143744, 114.895847746)
-        net = cv2.dnn.readNet(model, proto)
-        blob = cv2.dnn.blobFromImage(img, 1.0, (227, 227), model_mean_values, swapRB=False)
-        net.setInput(blob)
-        return net
-
-    @staticmethod
-    def __predict_feature(net, values):
-        predictions = net.forward()
-        return values[predictions[0].argmax()]
