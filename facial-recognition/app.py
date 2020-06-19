@@ -2,7 +2,7 @@ import os
 import logging
 from aiohttp import web
 import socketio
-from enrichment.age_gender_detector import AgeGenderDetector
+from enrichment.feature_detector import FeatureDetector
 from face_detector import FaceDetector
 
 logging.basicConfig(
@@ -10,8 +10,8 @@ logging.basicConfig(
     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
     datefmt='%m-%d %H:%M')
 
-age_gender_detector = AgeGenderDetector()
-face_detector = FaceDetector(age_gender_detector)
+feature_detector = FeatureDetector()
+face_detector = FaceDetector(feature_detector)
 
 
 def index(req):

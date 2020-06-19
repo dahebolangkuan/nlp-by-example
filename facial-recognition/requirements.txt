@@ -3,3 +3,4 @@ opencv-python==4.2.0.34
 Flask-SocketIO==4.3.0
 numpy==1.18.5
 aiohttp==3.6.2
+
